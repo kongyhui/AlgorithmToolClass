@@ -21,6 +21,10 @@ typedef NS_ENUM(NSUInteger, MIHSortType) {
     MIHSortTypeInsert,  //插入
     MIHSortTypeShell,   //希尔
     MIHSortTypeQuick,   //快速
+    MIHSortTypeMerge,   //归并
+    MIHSortTypeCount,   //计数
+    MIHSortTypeBucket,  //桶
+    MIHSortTypeRadix,   //基数
 };
 
 @interface MIHSortTool : NSObject
