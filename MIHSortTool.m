@@ -31,6 +31,8 @@ static NSMutableArray *datas;
             return [self quickSortDatas:unsortedDatas];
         case MIHSortTypeMerge:
             return [self mergeSortDatas:unsortedDatas];
+        case MIHSortTypeHeap:
+            return [self heapSortDatas:unsortedDatas];
         case MIHSortTypeCount:
             return [self countSortDatas:unsortedDatas];
         case MIHSortTypeBucket:
@@ -249,6 +251,56 @@ static NSMutableArray *datas;
 
 
 /**
+ 根据初始数组去构造初始堆（构建一个完全二叉树，保证所有的父结点都比它的孩子结点数值大）。
+ 每次交换第一个和最后一个元素，输出最后一个元素（最大值），然后把剩下元素重新调整为大根堆。
+ 当输出完最后一个元素后，这个数组已经是按照从小到大的顺序排列了。
+ 时间复杂度O(nlogn)
+ */
++ (NSMutableArray *)heapSortDatas:(NSMutableArray *)unsortedDatas{
+    NSMutableArray *heapArray = [self heapCreateWithDatas:unsortedDatas];
+    int endIndex = (int)heapArray.count - 1;
+    while (endIndex > 0) {
+        NSNumber *tmp = heapArray[endIndex];
+        heapArray[endIndex] = heapArray[0];
+        heapArray[0] = tmp;
+        
+        heapArray = [self heapAdjustWithDatas:heapArray beginIndex:0 endIndex:endIndex];
+        
+        endIndex --;
+    }
+    
+    return heapArray;
+}
++ (NSMutableArray *)heapCreateWithDatas:(NSMutableArray *)datas{
+    for (int i = (int)datas.count / 2 - 1; i >= 0; i --) {
+        [self heapAdjustWithDatas:datas beginIndex:i endIndex:(int)datas.count];
+    }
+    return datas;
+}
++ (NSMutableArray *)heapAdjustWithDatas:(NSMutableArray *)datas beginIndex:(int)begin endIndex:(int)end{
+    int fatherIndex = begin;
+    int childIndex = (2 * fatherIndex) + 1;
+    while (childIndex < end) {
+        if ((childIndex + 1) < end && ([datas[childIndex + 1] intValue] > [datas[childIndex] intValue])) {
+            childIndex += 1;
+        }
+        if ([datas[fatherIndex] intValue] >= [datas[childIndex] intValue]) {
+            break;
+        }
+        
+        NSNumber *tmp = datas[fatherIndex];
+        datas[fatherIndex] = datas[childIndex];
+        datas[childIndex] = tmp;
+        
+        fatherIndex = childIndex;
+        childIndex = (2 * fatherIndex) + 1;
+    }
+    
+    return datas;
+}
+
+
+/**
  *  计数排序的核心思想是把一个无序序列 A 转换成另一个有序序列 B，从 B 中逐个“取出”所有元素，取出的元素即为有序序列
  *  时间负责度O(n+k)
  */
@@ -337,18 +389,19 @@ static NSMutableArray *datas;
 
 /**
  *  基数排序是从待排序序列找出可以作为排序的「关键字」，按照「关键字」进行多次排序，最终得到有序序列。
+ *  时间复杂度O( n * k )
  */
 + (NSMutableArray *)radixSortDatas:(NSMutableArray *)unsortedDatas{
     int maxNum = [[unsortedDatas firstObject] intValue];
-    for (int i = 0; i < unsortedDatas.count; i ++) {
+    for (int i = 1; i < unsortedDatas.count; i ++) {
         if ([unsortedDatas[i] intValue] > maxNum) {
             maxNum = [unsortedDatas[i] intValue];
         }
     }
-    int cycleCount = 1;
-    while (maxNum / 10 != 0) {
-        cycleCount ++;
+    int cycleCount = 0;
+    while (maxNum > 0) {
         maxNum = maxNum / 10;
+        cycleCount ++;
     }
 
     NSMutableArray *buckets = [NSMutableArray arrayWithCapacity:10];
@@ -356,24 +409,22 @@ static NSMutableArray *datas;
         [buckets addObject:[NSMutableArray array]];
     }
     
-    NSMutableArray *results = [NSMutableArray arrayWithArray:unsortedDatas];
     for (int i = 0; i < cycleCount; i ++) {
-        for (int j = 0; j < results.count; j ++) {
-            NSNumber *currentNum = results[j];
+        for (int j = 0; j < unsortedDatas.count; j ++) {
+            NSNumber *currentNum = unsortedDatas[j];
             int index = ([currentNum intValue] / ((int)pow(10, i))) % 10;
             NSMutableArray *bucket = buckets[index];
             [bucket addObject:currentNum];
         }
         
-        [results removeAllObjects];
-        
+        [unsortedDatas removeAllObjects];
         [buckets enumerateObjectsUsingBlock:^(NSMutableArray * _Nonnull bucket, NSUInteger idx, BOOL * _Nonnull stop) {
-            [results addObjectsFromArray:bucket];
+            [unsortedDatas addObjectsFromArray:bucket];
             [bucket removeAllObjects];
         }];
     }
-    
-    return results;
+      
+    return unsortedDatas;
 }
 
 @end

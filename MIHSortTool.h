@@ -10,7 +10,7 @@
 /**
  *  参考文章链接
  *  https://cloud.tencent.com/developer/article/1485910
- *      
+ *  https://www.jianshu.com/p/259462254761
  */
 
 NS_ASSUME_NONNULL_BEGIN
@@ -22,6 +22,7 @@ typedef NS_ENUM(NSUInteger, MIHSortType) {
     MIHSortTypeShell,   //希尔
     MIHSortTypeQuick,   //快速
     MIHSortTypeMerge,   //归并
+    MIHSortTypeHeap,    //堆
     MIHSortTypeCount,   //计数
     MIHSortTypeBucket,  //桶
     MIHSortTypeRadix,   //基数
